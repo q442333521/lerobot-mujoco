@@ -74,7 +74,7 @@ def monitor_training(config_path=None, auto_timestamp=True):
             config_path = "smolvla_omy.yaml"
     
     # 启动训练进程 Start training process
-    cmd = ["python", "train_model.py", "--config_path", config_path]
+    cmd = ["python3", "train_model.py", "--config_path", config_path]
     
     print("="*80)
     print("🚀 Training Started | 训练已开始")
