@@ -127,6 +127,11 @@ def convert_urdf_to_mujoco_full(urdf_file, output_file):
     for link_name in ['base_link', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6']:
         mesh_name = link_name.lower()
         xml_lines.append(f'        <mesh name="{mesh_name}" file="meshes/{link_name}.STL" scale="0.001 0.001 0.001"/>')
+
+    xml_lines.append('')
+    xml_lines.append('        <!-- 夹爪STL网格 -->')
+    xml_lines.append('        <mesh name="gripper_base" file="meshes/gripper_base.stl" scale="0.001 0.001 0.001"/>')
+    xml_lines.append('        <mesh name="gripper_jaw" file="meshes/gripper_jaw.stl" scale="0.001 0.001 0.001"/>')
     xml_lines.append('    </asset>')
     xml_lines.append('')
     
@@ -193,50 +198,36 @@ def convert_urdf_to_mujoco_full(urdf_file, output_file):
         
         # 在L6上添加site和夹爪视角摄像头
         if joint_name == 'L6':
-            xml_lines.append(f'{ind}        <site name="end_effector" pos="0 0 -0.08" size="0.01"/>')
+            xml_lines.append(f'{ind}        <site name="end_effector" pos="0 0 -0.13" size="0.01"/>')
             xml_lines.append(f'{ind}        <!-- 夹爪视角摄像头 -->')
             xml_lines.append(f'{ind}        <camera name="gripper_cam" pos="0 -0.1 -0.05" xyaxes="0 0 1 -1 0 0" mode="fixed" fovy="60"/>')
-        
+
         xml_lines.append('')
         current_indent += 1
-    
-    # ========== 夹爪（简单几何体） ==========
+
+    # ========== 夹爪（真实STL模型） ==========
     ind = '    ' * current_indent
-    xml_lines.append(f'{ind}    <!-- 夹爪 -->')
-    xml_lines.append(f'{ind}    <body name="gripper_base" pos="0 0 -0.08">')
-    xml_lines.append(f'{ind}        <inertial pos="0 0 0" mass="0.05" diaginertia="0.0001 0.0001 0.0001"/>')
-    xml_lines.append(f'{ind}        <geom name="gripper_palm" type="box" size="0.02 0.025 0.01" rgba="0.3 0.3 0.3 1"/>')
+    xml_lines.append(f'{ind}    <!-- 夹爪（真实STL模型） -->')
+    xml_lines.append(f'{ind}    <body name="gripper_base" pos="0 0 -0.02">')
+    xml_lines.append(f'{ind}        <inertial pos="0 0 0" mass="0.1" diaginertia="0.0001 0.0001 0.0001"/>')
+    xml_lines.append(f'{ind}        <geom type="mesh" mesh="gripper_base" rgba="0.4 0.4 0.4 1"/>')
     xml_lines.append('')
-    
+
     # 左侧夹爪指
     xml_lines.append(f'{ind}        <!-- 左侧夹爪指 -->')
-    xml_lines.append(f'{ind}        <body name="gripper_left_outer" pos="0 0.025 0">')
-    xml_lines.append(f'{ind}            <inertial pos="0 0.015 0" mass="0.01" diaginertia="0.00001 0.00001 0.00001"/>')
-    xml_lines.append(f'{ind}            <joint name="rh_r1" type="slide" axis="0 1 0" range="0 0.04" damping="0.5"/>')
-    xml_lines.append(f'{ind}            <geom name="left_outer" type="box" size="0.005 0.02 0.04" pos="0 0.02 -0.04" rgba="0.2 0.2 0.2 1"/>')
+    xml_lines.append(f'{ind}        <body name="gripper_left" pos="0 0.01 -0.11">')
+    xml_lines.append(f'{ind}            <inertial pos="0 0.02 0" mass="0.05" diaginertia="0.00005 0.00005 0.00005"/>')
+    xml_lines.append(f'{ind}            <joint name="rh_l1" type="slide" axis="0 1 0" range="0 0.03" damping="1.0"/>')
+    xml_lines.append(f'{ind}            <geom type="mesh" mesh="gripper_jaw" rgba="0.3 0.3 0.3 1"/>')
     xml_lines.append(f'{ind}        </body>')
     xml_lines.append('')
-    
-    xml_lines.append(f'{ind}        <body name="gripper_left_inner" pos="0 0.015 0">')
-    xml_lines.append(f'{ind}            <inertial pos="0 0.015 0" mass="0.01" diaginertia="0.00001 0.00001 0.00001"/>')
-    xml_lines.append(f'{ind}            <joint name="rh_l1" type="slide" axis="0 1 0" range="0 0.04" damping="0.5"/>')
-    xml_lines.append(f'{ind}            <geom name="left_inner" type="box" size="0.005 0.02 0.04" pos="0 0.02 -0.04" rgba="0.2 0.2 0.2 1"/>')
-    xml_lines.append(f'{ind}        </body>')
-    xml_lines.append('')
-    
+
     # 右侧夹爪指
     xml_lines.append(f'{ind}        <!-- 右侧夹爪指 -->')
-    xml_lines.append(f'{ind}        <body name="gripper_right_outer" pos="0 -0.025 0">')
-    xml_lines.append(f'{ind}            <inertial pos="0 -0.015 0" mass="0.01" diaginertia="0.00001 0.00001 0.00001"/>')
-    xml_lines.append(f'{ind}            <joint name="rh_r2" type="slide" axis="0 -1 0" range="0 0.04" damping="0.5"/>')
-    xml_lines.append(f'{ind}            <geom name="right_outer" type="box" size="0.005 0.02 0.04" pos="0 -0.02 -0.04" rgba="0.2 0.2 0.2 1"/>')
-    xml_lines.append(f'{ind}        </body>')
-    xml_lines.append('')
-    
-    xml_lines.append(f'{ind}        <body name="gripper_right_inner" pos="0 -0.015 0">')
-    xml_lines.append(f'{ind}            <inertial pos="0 -0.015 0" mass="0.01" diaginertia="0.00001 0.00001 0.00001"/>')
-    xml_lines.append(f'{ind}            <joint name="rh_l2" type="slide" axis="0 -1 0" range="0 0.04" damping="0.5"/>')
-    xml_lines.append(f'{ind}            <geom name="right_inner" type="box" size="0.005 0.02 0.04" pos="0 -0.02 -0.04" rgba="0.2 0.2 0.2 1"/>')
+    xml_lines.append(f'{ind}        <body name="gripper_right" pos="0 -0.01 -0.11" euler="0 0 3.14159">')
+    xml_lines.append(f'{ind}            <inertial pos="0 0.02 0" mass="0.05" diaginertia="0.00005 0.00005 0.00005"/>')
+    xml_lines.append(f'{ind}            <joint name="rh_r1" type="slide" axis="0 1 0" range="0 0.03" damping="1.0"/>')
+    xml_lines.append(f'{ind}            <geom type="mesh" mesh="gripper_jaw" rgba="0.3 0.3 0.3 1"/>')
     xml_lines.append(f'{ind}        </body>')
     xml_lines.append(f'{ind}    </body>')  # gripper_base结束
     
@@ -261,8 +252,8 @@ def convert_urdf_to_mujoco_full(urdf_file, output_file):
     # 夹爪执行器
     xml_lines.append('')
     xml_lines.append('        <!-- 夹爪关节 -->')
-    for joint_name in ['rh_r1', 'rh_l1', 'rh_r2', 'rh_l2']:
-        xml_lines.append(f'        <position name="{joint_name}_motor" joint="{joint_name}" kp="50" ctrlrange="0 0.04"/>')
+    for joint_name in ['rh_l1', 'rh_r1']:
+        xml_lines.append(f'        <position name="{joint_name}_motor" joint="{joint_name}" kp="100" ctrlrange="0 0.03"/>')
     xml_lines.append('    </actuator>')
     xml_lines.append('')
     
@@ -277,7 +268,7 @@ def convert_urdf_to_mujoco_full(urdf_file, output_file):
     
     xml_lines.append('')
     xml_lines.append('        <!-- 夹爪传感器 -->')
-    for joint_name in ['rh_r1', 'rh_l1', 'rh_r2', 'rh_l2']:
+    for joint_name in ['rh_l1', 'rh_r1']:
         xml_lines.append(f'        <jointpos name="{joint_name}_pos" joint="{joint_name}"/>')
     xml_lines.append('    </sensor>')
     xml_lines.append('')
@@ -295,14 +286,14 @@ def convert_urdf_to_mujoco_full(urdf_file, output_file):
     print("   ✓ 原始场景 (天空、地面、桌子)")
     print("   ✓ 3个物体 (盘子、红色杯子、蓝色杯子)")
     print("   ✓ PAROL6机械臂 (6自由度)")
-    print("   ✓ 4自由度夹爪")
+    print("   ✓ 真实夹爪模型 (2自由度，左右手指)")
     print("   ✓ 2个摄像头 (agentview + gripper_cam)")
-    
+
     return output_file
 
 # 执行转换
 if __name__ == "__main__":
-    base_dir = Path("/home/wzy/lerobot-mujoco/01-Parol6")
+    base_dir = Path("/home/user/lerobot-mujoco/01-Parol6")
     urdf_file = base_dir / "urdf" / "parol6.urdf"
     output_file = base_dir / "parol6_full.xml"
     
@@ -316,8 +307,8 @@ if __name__ == "__main__":
         data = mujoco.MjData(model)
         
         print("   ✓ 模型加载成功!")
-        print(f"   ✓ 总关节数: {model.njnt} (6机械臂 + 4夹爪)")
-        print(f"   ✓ 总执行器: {model.nu} (6机械臂 + 4夹爪)")
+        print(f"   ✓ 总关节数: {model.njnt} (6机械臂 + 2夹爪)")
+        print(f"   ✓ 总执行器: {model.nu} (6机械臂 + 2夹爪)")
         print(f"   ✓ 总body数: {model.nbody}")
         print(f"   ✓ 摄像头数: {model.ncam}")
         
@@ -335,7 +326,7 @@ if __name__ == "__main__":
         print("✅ 转换和测试全部成功!")
         print("="*80)
         print("\n💡 使用方法:")
-        print("   xml_path = '/home/wzy/lerobot-mujoco/01-Parol6/parol6_full.xml'")
+        print("   xml_path = '/home/user/lerobot-mujoco/01-Parol6/parol6_full.xml'")
         print("   PnPEnv = SimpleEnv2(xml_path, seed=SEED)")
         
     except Exception as e:

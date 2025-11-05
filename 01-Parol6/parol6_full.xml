@@ -46,6 +46,10 @@
         <mesh name="l4" file="meshes/L4.STL" scale="0.001 0.001 0.001"/>
         <mesh name="l5" file="meshes/L5.STL" scale="0.001 0.001 0.001"/>
         <mesh name="l6" file="meshes/L6.STL" scale="0.001 0.001 0.001"/>
+
+        <!-- 夹爪STL网格 -->
+        <mesh name="gripper_base" file="meshes/gripper_base.stl" scale="0.001 0.001 0.001"/>
+        <mesh name="gripper_jaw" file="meshes/gripper_jaw.stl" scale="0.001 0.001 0.001"/>
     </asset>
 
     <!-- 机械臂 -->
@@ -90,39 +94,27 @@
                                     <inertial pos="0.0063 -0.0005 -0.0554" mass="0.0703" diaginertia="0.000014 0.000018 0.000023"/>
                                     <joint name="L6" type="hinge" axis="0.0 0.0 -1.0" limited="false" damping="0.3"/>
                                     <geom type="mesh" mesh="l6" rgba="0.75 0.75 0.75 1"/>
-                                    <site name="end_effector" pos="0 0 -0.08" size="0.01"/>
+                                    <site name="end_effector" pos="0 0 -0.13" size="0.01"/>
                                     <!-- 夹爪视角摄像头 -->
                                     <camera name="gripper_cam" pos="0 -0.1 -0.05" xyaxes="0 0 1 -1 0 0" mode="fixed" fovy="60"/>
 
-                                    <!-- 夹爪 -->
-                                    <body name="gripper_base" pos="0 0 -0.08">
-                                        <inertial pos="0 0 0" mass="0.05" diaginertia="0.0001 0.0001 0.0001"/>
-                                        <geom name="gripper_palm" type="box" size="0.02 0.025 0.01" rgba="0.3 0.3 0.3 1"/>
+                                    <!-- 夹爪（真实STL模型） -->
+                                    <body name="gripper_base" pos="0 0 -0.02">
+                                        <inertial pos="0 0 0" mass="0.1" diaginertia="0.0001 0.0001 0.0001"/>
+                                        <geom type="mesh" mesh="gripper_base" rgba="0.4 0.4 0.4 1"/>
 
                                         <!-- 左侧夹爪指 -->
-                                        <body name="gripper_left_outer" pos="0 0.025 0">
-                                            <inertial pos="0 0.015 0" mass="0.01" diaginertia="0.00001 0.00001 0.00001"/>
-                                            <joint name="rh_r1" type="slide" axis="0 1 0" range="0 0.04" damping="0.5"/>
-                                            <geom name="left_outer" type="box" size="0.005 0.02 0.04" pos="0 0.02 -0.04" rgba="0.2 0.2 0.2 1"/>
-                                        </body>
-
-                                        <body name="gripper_left_inner" pos="0 0.015 0">
-                                            <inertial pos="0 0.015 0" mass="0.01" diaginertia="0.00001 0.00001 0.00001"/>
-                                            <joint name="rh_l1" type="slide" axis="0 1 0" range="0 0.04" damping="0.5"/>
-                                            <geom name="left_inner" type="box" size="0.005 0.02 0.04" pos="0 0.02 -0.04" rgba="0.2 0.2 0.2 1"/>
+                                        <body name="gripper_left" pos="0 0.01 -0.11">
+                                            <inertial pos="0 0.02 0" mass="0.05" diaginertia="0.00005 0.00005 0.00005"/>
+                                            <joint name="rh_l1" type="slide" axis="0 1 0" range="0 0.03" damping="1.0"/>
+                                            <geom type="mesh" mesh="gripper_jaw" rgba="0.3 0.3 0.3 1"/>
                                         </body>
 
                                         <!-- 右侧夹爪指 -->
-                                        <body name="gripper_right_outer" pos="0 -0.025 0">
-                                            <inertial pos="0 -0.015 0" mass="0.01" diaginertia="0.00001 0.00001 0.00001"/>
-                                            <joint name="rh_r2" type="slide" axis="0 -1 0" range="0 0.04" damping="0.5"/>
-                                            <geom name="right_outer" type="box" size="0.005 0.02 0.04" pos="0 -0.02 -0.04" rgba="0.2 0.2 0.2 1"/>
-                                        </body>
-
-                                        <body name="gripper_right_inner" pos="0 -0.015 0">
-                                            <inertial pos="0 -0.015 0" mass="0.01" diaginertia="0.00001 0.00001 0.00001"/>
-                                            <joint name="rh_l2" type="slide" axis="0 -1 0" range="0 0.04" damping="0.5"/>
-                                            <geom name="right_inner" type="box" size="0.005 0.02 0.04" pos="0 -0.02 -0.04" rgba="0.2 0.2 0.2 1"/>
+                                        <body name="gripper_right" pos="0 -0.01 -0.11" euler="0 0 3.14159">
+                                            <inertial pos="0 0.02 0" mass="0.05" diaginertia="0.00005 0.00005 0.00005"/>
+                                            <joint name="rh_r1" type="slide" axis="0 1 0" range="0 0.03" damping="1.0"/>
+                                            <geom type="mesh" mesh="gripper_jaw" rgba="0.3 0.3 0.3 1"/>
                                         </body>
                                     </body>
                                 </body>
@@ -145,10 +137,8 @@
         <position name="L6_motor" joint="L6" kp="50" ctrlrange="-3.14 3.14"/>
 
         <!-- 夹爪关节 -->
-        <position name="rh_r1_motor" joint="rh_r1" kp="50" ctrlrange="0 0.04"/>
-        <position name="rh_l1_motor" joint="rh_l1" kp="50" ctrlrange="0 0.04"/>
-        <position name="rh_r2_motor" joint="rh_r2" kp="50" ctrlrange="0 0.04"/>
-        <position name="rh_l2_motor" joint="rh_l2" kp="50" ctrlrange="0 0.04"/>
+        <position name="rh_l1_motor" joint="rh_l1" kp="100" ctrlrange="0 0.03"/>
+        <position name="rh_r1_motor" joint="rh_r1" kp="100" ctrlrange="0 0.03"/>
     </actuator>
 
     <!-- 传感器 -->
@@ -168,10 +158,8 @@
         <jointvel name="L6_vel" joint="L6"/>
 
         <!-- 夹爪传感器 -->
-        <jointpos name="rh_r1_pos" joint="rh_r1"/>
         <jointpos name="rh_l1_pos" joint="rh_l1"/>
-        <jointpos name="rh_r2_pos" joint="rh_r2"/>
-        <jointpos name="rh_l2_pos" joint="rh_l2"/>
+        <jointpos name="rh_r1_pos" joint="rh_r1"/>
     </sensor>
 
 </mujoco>
